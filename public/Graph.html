@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <label for="date">Enter Date to check</label>
+    <input class="inside"  id="date" type="date">
+    <form>
+        <label for="area">Choose an area<area shape="" coords="" href="" alt=""></label>
+        <select id="area" name="dropdown">
+            <option value="Adyar">Adyar</option>
+<option value="Ambathur">Ambathur</option>
+<option value="Anna Nagar">Anna Nagar</option>
+<option value="Anna university">Anna university</option>
+<option value="Ayanavaram taluk office">Ayanavaram taluk office</option>
+<option value="CD Hospital Tondiarpet">CD Hospital Tondiarpet</option>
+<option value="Chennai AP">Chennai AP</option>
+<option value="Chennai collectorate building">Chennai collectorate building</option>
+<option value="Chennai nungambakkam">Chennai nungambakkam</option>
+<option value="Chennai port trust">Chennai port trust</option>
+<option value="DGP Office">DGP Office</option>
+<option value="Ezhilgam">Ezhilgam</option>
+<option value="Gov hr sec school MGR Nagar">Gov hr sec school MGR Nagar</option>
+<option value="Govt. arts college">Govt. arts college</option>
+<option value="Kodambakkam">Kodambakkam</option>
+<option value="MYLAPORE-TRIPLICANE TALUK">MYLAPORE-TRIPLICANE TALUK</option>
+<option value="Madhavaram">Madhavaram</option>
+<option value="Manali">Manali</option>
+<option value="Pachaiyappa college">Pachaiyappa college</option>
+<option value="Perambur Corporation park">Perambur Corporation park</option>
+<option value="Perungudi">Perungudi</option>
+<option value="Purasawalkam - Perambur">Purasawalkam - Perambur</option>
+<option value="Puzhal">Puzhal</option>
+<option value="Royapuram">Royapuram</option>
+<option value="Sholinganallur">Sholinganallur</option>
+<option value="Teynampet">Teynampet</option>
+<option value="Thiru-Vi-Ka Nagar">Thiru-Vi-Ka Nagar</option>
+<option value="Thiruvottiyur">Thiruvottiyur</option>
+<option value="Tondairpet">Tondairpet</option>
+<option value="Valasaravakkam">Valasaravakkam</option>
+        </select>
+        <br><br>
+    </form>
+    <button onclick=trigger()>Submit</button>
+    <canvas id="myLineChart"></canvas>
+    <script>
+        let myLineChart;
+        let ans;
+        let topush =[];
+        function trigger(){
+            topush=[];
+        //const date = document.getElementById('date');
+        console.log(date.value);
+        //const area = document.getElementById('area');
+        fetch("/", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            date: date.value,   // No need for template literals if you're just accessing the value
+            area: area.value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(JSON.stringify(data));
+        if(data['data'].length==0){
+            alert("Bye!")
+        } else{
+        ans = data["data"][0]["Rainfall"];
+        console.log(JSON.stringify(ans));
+        if(ans<20){
+        topush.push(ans);
+        for(let j=2;j<=24;j++){topush.push(0);}}
+    
+    else if(ans<80){
+        let perhour = ans/6;
+        for(let j=0;j<3;j++){
+            let random = 0.4 + Math.random()*0.2;
+            let toadd = perhour*random;
+            topush.push(perhour+toadd);
+            topush.push(perhour-toadd);
+        }
+        for(let k=7;k<=24;k++){
+            topush.push(0);
+        }
+        
+    }
+    else if(ans<170){
+        let perhour = ans/12;
+        for(let j=0;j<6;j++){
+            let random = 0.4 + Math.random()*0.2;
+            let toadd = perhour*random;
+            topush.push(perhour+toadd);
+            topush.push(perhour-toadd);
+        }
+        for(let k=13;k<=24;k++){
+            topush[k]=0;
+        }
+    }
+    else{
+        let perhour = ans/24;
+        for(let j=0;j<12;j++){
+            let random = 0.4 + Math.random()*0.2;
+            let toadd = perhour*random;
+            topush.push(perhour+toadd);
+            topush.push(perhour-toadd);
+        }
+    }
+    const ctx = document.getElementById('myLineChart').getContext('2d');
+    if(myLineChart){
+        myLineChart.destroy();
+    }
+    myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Hour 1','Hour 2','Hour 3','Hour 4','Hour 5','Hour 6','Hour 7','Hour 8','Hour 9','Hour 10','Hour 11','Hour 12','Hour 13','Hour 14','Hour 15','Hour 16','Hour 17','Hour 18','Hour 19','Hour 20','Hour 21','Hour 22','Hour 23','Hour 24'],
+            datasets: [{
+                label: 'Rain Poured (in mm)',
+                data: topush,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });}
+    //console.log(`${topush}` + 'naa tha varen');
+    })
+    .catch(error => {
+        console.error('Error:', error);  // Optional: Handle errors more gracefully
+    });}
+
+    
+
+
+    </script>
+</body>
+</html>
